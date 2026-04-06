@@ -1,4 +1,8 @@
-const ENVIRONMENT = "Dev"; // Type "Dev" or "Prod"
+// =====================================================================
+// 1. FRONTEND ENVIRONMENT TOGGLE
+// Change this single value to "Dev" or "Prod"
+// =====================================================================
+const ENVIRONMENT = "Dev"; 
 
 const DEV_API_URL = 'https://script.google.com/macros/s/AKfycbzsU73hNlYm9vqAY4Mn80s_6KMP79eLCi11u8d56NkO_1iDp7a0ew09OWOdvfhzK75T/exec';
 const PROD_API_URL = 'https://script.google.com/macros/s/AKfycbw21ZGdd-SfmRJrB-zMcfzVKTzIG-hU-BwKaA33J1bukq-4_ZJGQfH6_KBr4LdgjZvXmw/exec';
