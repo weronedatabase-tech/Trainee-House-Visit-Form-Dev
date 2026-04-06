@@ -2,7 +2,7 @@ function appData() {
     return {
         view: 'dashboard', 
         darkMode: localStorage.getItem('theme') === 'dark',
-        isLoggedIn: false, 
+        isLoggedIn: false, // Always starts as false now
         loginPass: '', 
         showLoginPass: false, 
         loginError: '',
@@ -30,7 +30,9 @@ function appData() {
             this.toggleTheme(false);
             this.loadConfigFromStorage();
             if (navigator.onLine) this.fetchConfig();
-            if (localStorage.getItem('isLoggedIn') === 'true') this.isLoggedIn = true;
+            
+            // REMOVED: The check for localStorage 'isLoggedIn' token.
+            // The user will now be forced to log in every time the page loads.
         },
 
         toggleSection(title) {
@@ -160,7 +162,12 @@ function appData() {
             this.setLoading(true);
             try {
                 const data = await this.performAction('login', { password: this.loginPass });
-                if (data.success) { this.isLoggedIn = true; localStorage.setItem('isLoggedIn', 'true'); await this.fetchConfig(); } 
+                if (data.success) { 
+                    this.isLoggedIn = true; 
+                    // REMOVED: localStorage.setItem('isLoggedIn', 'true');
+                    // We no longer save the login state to the browser.
+                    await this.fetchConfig(); 
+                } 
                 else this.loginError = 'Incorrect Password';
             } catch(e) { this.loginError = 'Connection Error.'; }
             finally { this.setLoading(false); }
@@ -169,7 +176,7 @@ function appData() {
         async fetchConfig() {
             try {
                 const data = await this.performAction('getConfig');
-                this.headers = Array.isArray(data.headers) ? data.headers.map(String) : [];
+                this.headers = Array.isArray(data.headers) ? data.headers.map(String) :[];
                 this.trainees = data.trainees ||[];
                 this.projects = data.projects ||[];
                 this.mapping = data.mapping || {};
@@ -269,7 +276,7 @@ function appData() {
         },
 
         get groupedHeaders() {
-            if (!this.headers || !Array.isArray(this.headers) || this.headers.length === 0) return [];
+            if (!this.headers || !Array.isArray(this.headers) || this.headers.length === 0) return[];
             
             let groups =[];
             const orderToUse = (this.sectionOrder && this.sectionOrder.length > 0) ? this.sectionOrder : ['General Details'];
@@ -386,16 +393,4 @@ function appData() {
                     this.trainees=d.trainees||[]; 
                     this.projects=d.projects||[]; 
                     this.mapping=d.mapping||{}; 
-                    this.sectionOrder=d.sectionOrder||[];
-                } catch(e){} 
-            } 
-        },
-        resetAppData() { localStorage.clear(); window.location.reload(true); },
-        openSettings() { this.showSettings=true; },
-        unlockSettings() { if(this.settingsPass==='werone') this.settingsUnlocked=true; else this.settingsError='Wrong Password'; },
-        addColumn() { this.performAction('addColumn', {headerName:this.newColumnName}); },
-        renameColumn(idx, name) { this.performAction('renameColumn', {colIndex:idx, newName:name}); },
-        changePassword() { /* Implementation for changing password */ },
-        showToast(m,t) { this.toast.message=m;this.toast.type=t;this.toast.visible=true;setTimeout(()=>this.toast.visible=false,3000); }
-    }
-                  }
+                    this.sectionOrder=d.sectionOrder||
