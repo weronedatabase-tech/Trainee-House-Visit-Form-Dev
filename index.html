@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- ANTI-CACHING META TAGS -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <title>House Visit Form</title>
     
     <!-- Tailwind & Alpine -->
@@ -32,8 +38,11 @@
         }
     </script>
 
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- DYNAMIC CACHE-BUSTING FOR CSS -->
+    <script>
+        var cacheBuster = new Date().getTime();
+        document.write('<link rel="stylesheet" href="css/styles.css?v=' + cacheBuster + '">');
+    </script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200 min-h-screen"
       x-data="appData()" x-init="initApp()">
@@ -166,7 +175,7 @@
                                             <div class="mt-2 mb-4 bg-gray-50 dark:bg-gray-900 p-3 sm:p-4 rounded-lg border dark:border-gray-700 flex flex-row items-center justify-between gap-1 sm:gap-4">
                                                 <span class="w-1/3 text-right text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 leading-tight pr-1" x-text="getLikertLabel(field.label, 'left')"></span>
                                                 <div class="flex gap-2 sm:gap-4 shrink-0 justify-center">
-                                                    <template x-for="val in [1, 2, 3, 4, 5]" :key="val">
+                                                    <template x-for="val in[1, 2, 3, 4, 5]" :key="val">
                                                         <label class="flex flex-col items-center cursor-pointer">
                                                             <span class="text-[10px] sm:text-xs font-bold mb-1" x-text="val"></span>
                                                             <input type="radio" :name="'likert-'+field.index" :value="val" x-model="formData[field.index]" class="custom-radio w-5 h-5 sm:w-6 sm:h-6 border-2 rounded-full focus:ring-0 cursor-pointer appearance-none bg-white dark:bg-gray-700 checked:bg-primary border-gray-300">
@@ -304,8 +313,11 @@
         </div>
     </div>
 
-    <!-- Load Scripts at the end -->
-    <script src="js/config.js"></script>
-    <script src="js/app.js"></script>
+    <!-- DYNAMIC CACHE-BUSTING FOR JS -->
+    <script>
+        var cacheBuster = new Date().getTime();
+        document.write('<script src="js/config.js?v=' + cacheBuster + '"><\/script>');
+        document.write('<script src="js/app.js?v=' + cacheBuster + '"><\/script>');
+    </script>
 </body>
 </html>
