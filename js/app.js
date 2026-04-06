@@ -8,7 +8,7 @@ function appData() {
         showLoginPass: false, 
         loginError: '',
         toast: { visible: false, message: '', type: 'success' },
-        headers: [], trainees:[], projects: [], mapping: {}, sectionOrder:[], searchQuery: '', loadingTrainees: false,
+        headers: [], trainees: [], projects: [], mapping: {}, sectionOrder:[], searchQuery: '', loadingTrainees: false,
         formData: {}, isSubmitting: false, isLoading: false, loadingText: 'Please wait...',
         showSettings: false, settingsPass: '', showSettingsPass: false, settingsUnlocked: false, settingsError: '', 
         newColumnName: '', newAppPass: '', newSettingsPass: '',
@@ -153,7 +153,12 @@ function appData() {
         
         async performAction(action, payload = {}) {
             payload.action = action;
-            const res = await fetch(CONFIG.API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+            const res = await fetch(CONFIG.API_URL, { 
+                method: "POST", 
+                headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+                body: JSON.stringify(payload),
+                cache: "no-store" // Prevents API caching
+            });
             return await res.json();
         },
 
@@ -279,7 +284,7 @@ function appData() {
             if (!this.headers || !Array.isArray(this.headers) || this.headers.length === 0) return [];
             
             let groups =[];
-            const orderToUse = (this.sectionOrder && this.sectionOrder.length > 0) ? this.sectionOrder :['General Details'];
+            const orderToUse = (this.sectionOrder && this.sectionOrder.length > 0) ? this.sectionOrder : ['General Details'];
 
             const getColors = (t) => {
                 const l=t.toLowerCase();
