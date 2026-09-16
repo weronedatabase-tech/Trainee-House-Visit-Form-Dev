@@ -571,24 +571,6 @@ function appData() {
                this.loadingText = 'Loading...';
            }
        },
-
-       async forceAuth() {
-           this.isLoading = true;
-           this.loadingText = 'Pinging auth services...';
-           try {
-               const data = await this.performAction('forceAuth');
-               if (data.success) {
-                   this.showToast('Auth ping successful', 'success');
-               } else {
-                   this.showToast(data.error || 'Auth ping failed', 'error');
-               }
-           } catch (e) {
-               this.showToast('Connection Error', 'error');
-           } finally {
-               this.isLoading = false;
-               this.loadingText = 'Loading...';
-           }
-       },
        
        showToast(m, t) { 
            this.toast.message = m;

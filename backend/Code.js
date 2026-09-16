@@ -222,13 +222,6 @@ function doPost(e) {
       return sendJSON({ success: true });
     }
 
-    if (action === 'forceAuth') {
-      // Dummy calls to force Google Apps Script to auto-detect scopes for Drive and Spreadsheets
-      DriveApp.getRootFolder();
-      SpreadsheetApp.getActiveSpreadsheet();
-      return sendJSON({ success: true, message: "Authorization ping successful." });
-    }
-
     if (action === 'generateMockData') {
       if (typeof APP_ENVIRONMENT === 'undefined' || APP_ENVIRONMENT !== "Exp") {
         return sendJSON({ error: "Only available in Experimentation mode." });
@@ -309,4 +302,14 @@ function doPost(e) {
 
 function sendJSON(data) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * Run this function manually in the Google Apps Script IDE 
+ * to trigger the authorization popup for Drive and Sheets scopes.
+ */
+function triggerAuthorization() {
+  DriveApp.getRootFolder();
+  SpreadsheetApp.getActiveSpreadsheet();
+  Logger.log("Authorization scopes detected successfully.");
 }
