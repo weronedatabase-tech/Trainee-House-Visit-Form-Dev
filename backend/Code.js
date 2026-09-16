@@ -311,5 +311,11 @@ function sendJSON(data) {
 function triggerAuthorization() {
   DriveApp.getRootFolder();
   SpreadsheetApp.getActiveSpreadsheet();
+  
+  // Force the Google Apps Script static analyzer to detect the full 'drive' scope (not just readonly)
+  try {
+    DriveApp.createFile("auth_dummy_file", "dummy");
+  } catch(e) {}
+  
   Logger.log("Authorization scopes detected successfully.");
 }
