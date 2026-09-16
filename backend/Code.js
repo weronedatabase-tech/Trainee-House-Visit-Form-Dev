@@ -309,13 +309,13 @@ function sendJSON(data) {
  * to trigger the authorization popup for Drive and Sheets scopes.
  */
 function triggerAuthorization() {
-  DriveApp.getRootFolder();
-  SpreadsheetApp.getActiveSpreadsheet();
-  
-  // Force the Google Apps Script static analyzer to detect the full 'drive' scope (not just readonly)
-  try {
-    DriveApp.createFile("auth_dummy_file", "dummy");
-  } catch(e) {}
-  
-  Logger.log("Authorization scopes detected successfully.");
+  // The static analyzer scans all code (even unreachable code) to determine scopes.
+  // By explicitly referencing makeCopy and setTrashed, we force Google to ask for full Drive access.
+  if (false) {
+    var dummyFile = DriveApp.getFileById("dummy_id");
+    dummyFile.makeCopy("dummy_name");
+    dummyFile.setTrashed(true);
+    DriveApp.getFiles();
+  }
+  Logger.log("Authorization scopes detected. If no popup appears, follow the instructions to revoke cached permissions.");
 }
