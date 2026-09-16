@@ -252,23 +252,48 @@ function doPost(e) {
            mockTrainees.push("Mock Trainee " + i);
         }
         
+        const firstNames = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen"];
+        const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
+        const streets = ["Orchard Road", "Changi Business Park", "Marina Boulevard", "Tampines Avenue", "Jurong East Street", "Woodlands Drive", "Bukit Batok East", "Serangoon North", "Bishan Street", "Yishun Ring Road"];
+        
         for (let i = 0; i < 100; i++) {
           let row = [];
           headers.forEach(h => {
             const lowerH = String(h).toLowerCase();
-            if (lowerH.includes("timestamp") || lowerH.includes("date")) {
+            if (lowerH.includes("timestamp") || lowerH.includes("date of visit")) {
                // Generate random date in the past year
                row.push(new Date(Date.now() - Math.floor(Math.random() * 31536000000)));
+            } else if (lowerH.includes("date of birth") || lowerH.includes("dob")) {
+               // Generate random date between 20 and 60 years ago
+               const start = new Date(1960, 0, 1).getTime();
+               const end = new Date(2005, 0, 1).getTime();
+               row.push(new Date(start + Math.random() * (end - start)));
             } else if (lowerH.includes("name") && lowerH.includes("trainee")) {
                row.push(mockTrainees[i]);
+            } else if (lowerH.includes("volunteer")) {
+               const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+               const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+               row.push(randomFirst + " " + randomLast);
             } else if (lowerH.includes("project")) {
                row.push("Mock Project " + (Math.floor(Math.random() * 5) + 1));
+            } else if (lowerH.includes("nric") || lowerH.includes("id")) {
+               row.push(Math.floor(Math.random() * 900 + 100) + String.fromCharCode(65 + Math.floor(Math.random() * 26))); // e.g. 123A
+            } else if (lowerH.includes("address")) {
+               const blk = Math.floor(Math.random() * 900) + 1;
+               const street = streets[Math.floor(Math.random() * streets.length)];
+               const unit = "#" + (Math.floor(Math.random() * 20) + 1) + "-" + (Math.floor(Math.random() * 900) + 100);
+               row.push("Blk " + blk + " " + street + " " + unit);
+            } else if (lowerH.includes("blood type")) {
+               const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+               row.push(bloodTypes[Math.floor(Math.random() * bloodTypes.length)]);
+            } else if (lowerH.includes("contact") || lowerH.includes("phone")) {
+               row.push("8" + Math.floor(Math.random() * 9000000 + 1000000));
             } else {
-               // Random data
-               if (Math.random() > 0.5) {
+               // For general fields, if it looks like a question, use Likert mostly, else text
+               if (lowerH.includes("how") || lowerH.includes("rate") || lowerH.includes("level") || Math.random() > 0.7) {
                   row.push(Math.floor(Math.random() * 5) + 1); // Mock likert
                } else {
-                  row.push("Mock text for " + h + " " + i);
+                  row.push("General notes for this entry regarding " + String(h).substring(0, 15) + "...");
                }
             }
           });
