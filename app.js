@@ -42,7 +42,7 @@ function appData() {
        toast: { visible: false, message: '', type: 'success' },
        headers: [], trainees: [], projects:[], mapping: {}, sectionOrder:[], searchQuery: '', loadingTrainees: false,
        formData: {}, isSubmitting: false, isLoading: false, loadingText: 'Please wait...',
-       showSettings: false, settingsPass: '', showSettingsPass: false, settingsUnlocked: false, settingsError: '', mockDataMsg: '', mockDataError: false,
+       showSettings: false, settingsPass: '', showSettingsPass: false, settingsUnlocked: false, settingsError: '', mockDataMsg: '', mockDataError: false, mockDataUrl: '',
        newColumnName: '', newAppPass: '', newSettingsPass: '',
        
        expandedSections: {},
@@ -555,7 +555,8 @@ function appData() {
            try {
                const data = await this.performAction('generateMockData');
                if (data.success) {
-                   this.mockDataMsg = 'Mock data sheet created successfully! Check your Google Drive for "Mock Data - ..."';
+                   this.mockDataMsg = 'Mock data sheet created successfully!';
+                   this.mockDataUrl = data.url || '';
                    this.mockDataError = false;
                    this.showToast('Mock Data Generated', 'success');
                } else {

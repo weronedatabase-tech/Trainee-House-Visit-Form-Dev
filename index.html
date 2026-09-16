@@ -320,7 +320,12 @@
                <div x-show="isExpMode" class="border-t pt-4 dark:border-neutral-700">
                     <h3 class="font-bold mb-3 text-sm text-gray-500 dark:text-neutral-300">Experimentation</h3>
                     <button @click="generateMockData" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-bold text-sm transition">Generate Mock Data Sheet</button>
-                    <div x-show="mockDataMsg" class="mt-2 text-xs text-center font-medium" :class="mockDataError ? 'text-red-500' : 'text-green-500'" x-text="mockDataMsg"></div>
+                    <div x-show="mockDataMsg" class="mt-2 text-xs text-center font-medium" :class="mockDataError ? 'text-red-500' : 'text-green-500'">
+                         <span x-text="mockDataMsg"></span>
+                         <template x-if="mockDataUrl">
+                             <a :href="mockDataUrl" target="_blank" class="block mt-1 underline text-blue-500 hover:text-blue-600">Open Mock Data Sheet</a>
+                         </template>
+                    </div>
                </div>
            </div>
        </div>

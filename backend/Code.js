@@ -286,14 +286,37 @@ function doPost(e) {
             } else if (lowerH.includes("blood type")) {
                const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
                row.push(bloodTypes[Math.floor(Math.random() * bloodTypes.length)]);
-            } else if (lowerH.includes("contact") || lowerH.includes("phone")) {
+            } else if (lowerH.includes("contact") || lowerH.includes("phone") || lowerH.includes("mobile")) {
                row.push("8" + Math.floor(Math.random() * 9000000 + 1000000));
+            } else if (lowerH.includes("gender") || lowerH.includes("sex")) {
+               row.push(Math.random() > 0.5 ? "Male" : "Female");
+            } else if (lowerH.includes("race") || lowerH.includes("ethnicity")) {
+               const races = ["Chinese", "Malay", "Indian", "Eurasian", "Others"];
+               row.push(races[Math.floor(Math.random() * races.length)]);
+            } else if (lowerH.includes("status")) {
+               const statuses = ["Active", "Pending", "Completed", "Follow-up Needed"];
+               row.push(statuses[Math.floor(Math.random() * statuses.length)]);
+            } else if (lowerH.includes("pressure") || lowerH.includes("bp")) {
+               row.push((Math.floor(Math.random() * 40) + 100) + "/" + (Math.floor(Math.random() * 20) + 70));
+            } else if (lowerH.includes("heart rate") || lowerH.includes("pulse")) {
+               row.push(Math.floor(Math.random() * 40) + 60);
+            } else if (lowerH.includes("weight")) {
+               row.push((Math.floor(Math.random() * 40) + 50) + " kg");
+            } else if (lowerH.includes("height")) {
+               row.push((Math.floor(Math.random() * 40) + 150) + " cm");
+            } else if (lowerH.includes("email")) {
+               row.push("mock" + i + "@example.com");
+            } else if (lowerH.includes("is ") || lowerH.includes("has ") || lowerH.includes("did ") || lowerH.includes("can ")) {
+               row.push(Math.random() > 0.5 ? "Yes" : "No");
+            } else if (lowerH.includes("remark") || lowerH.includes("note") || lowerH.includes("feedback") || lowerH.includes("comment")) {
+               const notes = ["Session went well, making good progress.", "Needs more attention on the physical exercises next time.", "Engaged actively and communicated clearly.", "A bit tired today, kept session light.", "Excellent participation.", "Follow up required next week regarding the new routine.", "No major issues to report."];
+               row.push(notes[Math.floor(Math.random() * notes.length)]);
             } else {
                // For general fields, if it looks like a question, use Likert mostly, else text
-               if (lowerH.includes("how") || lowerH.includes("rate") || lowerH.includes("level") || Math.random() > 0.7) {
+               if (lowerH.includes("how") || lowerH.includes("rate") || lowerH.includes("level") || lowerH.includes("score")) {
                   row.push(Math.floor(Math.random() * 5) + 1); // Mock likert
                } else {
-                  row.push("General notes for this entry regarding " + String(h).substring(0, 15) + "...");
+                  row.push("Mock text entry");
                }
             }
           });
@@ -316,7 +339,7 @@ function doPost(e) {
         }
       }
       
-      return sendJSON({ success: true });
+      return sendJSON({ success: true, url: newFile.getUrl() });
     }
 
     return sendJSON({ error: "Unknown Action" });
