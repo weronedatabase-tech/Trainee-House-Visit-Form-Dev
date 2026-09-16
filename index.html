@@ -283,38 +283,38 @@
                </div>
            </div>
        </div>
+   </div> <!-- END APP/ISLOGGEDIN CONTAINER -->
 
-       <!-- SETTINGS -->
-       <div x-show="showSettings" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" x-cloak>
-           <div class="bg-white dark:bg-neutral-900 p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-               <div class="flex justify-between items-center mb-6">
-                   <h2 class="text-xl font-bold">Settings</h2>
-                   <button @click="showSettings = false" class="text-xl">✕</button>
+   <!-- SETTINGS -->
+   <div x-show="showSettings" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" x-cloak>
+       <div class="bg-white dark:bg-neutral-900 p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+           <div class="flex justify-between items-center mb-6">
+               <h2 class="text-xl font-bold">Settings</h2>
+               <button @click="showSettings = false" class="text-xl">✕</button>
+           </div>
+           <div x-show="!settingsUnlocked">
+               <div x-show="settingsError" class="text-red-500 text-sm mb-2" x-text="settingsError"></div>
+               
+               <!-- SETTINGS PASSWORD WITH SHOW/HIDE -->
+               <div class="relative w-full mb-3">
+                   <input :type="showSettingsPass ? 'text' : 'password'" x-model="settingsPass" @keyup.enter="unlockSettings" placeholder="Settings Password" 
+                          class="w-full p-3 border rounded dark:bg-neutral-800 dark:border-neutral-700 focus:ring-2 focus:ring-primary outline-none">
+                   <button type="button" @click="showSettingsPass = !showSettingsPass" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-primary">
+                       <svg x-show="!showSettingsPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                       <svg x-show="showSettingsPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                   </button>
                </div>
-               <div x-show="!settingsUnlocked">
-                   <div x-show="settingsError" class="text-red-500 text-sm mb-2" x-text="settingsError"></div>
-                   
-                   <!-- SETTINGS PASSWORD WITH SHOW/HIDE -->
-                   <div class="relative w-full mb-3">
-                       <input :type="showSettingsPass ? 'text' : 'password'" x-model="settingsPass" @keyup.enter="unlockSettings" placeholder="Settings Password" 
-                              class="w-full p-3 border rounded dark:bg-neutral-800 dark:border-neutral-700 focus:ring-2 focus:ring-primary outline-none">
-                       <button type="button" @click="showSettingsPass = !showSettingsPass" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-primary">
-                           <svg x-show="!showSettingsPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                           <svg x-show="showSettingsPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
-                       </button>
-                   </div>
 
-                   <button @click="unlockSettings" class="w-full bg-gray-800 text-white p-3 rounded">Unlock</button>
+               <button @click="unlockSettings" class="w-full bg-gray-800 text-white p-3 rounded">Unlock</button>
+           </div>
+           <div x-show="settingsUnlocked" class="space-y-6">
+               <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
+                   <button @click="resetAppData" class="w-full bg-red-600 text-white px-4 py-2 rounded font-bold text-sm">Reset App Data</button>
                </div>
-               <div x-show="settingsUnlocked" class="space-y-6">
-                   <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
-                       <button @click="resetAppData" class="w-full bg-red-600 text-white px-4 py-2 rounded font-bold text-sm">Reset App Data</button>
-                   </div>
-                   <div class="border-t pt-4 dark:border-neutral-700">
-                        <h3 class="font-bold mb-3 text-sm text-gray-500 dark:text-neutral-300">Security</h3>
-                        <div class="mb-3"><input type="text" x-model="newAppPass" placeholder="New App Password" class="w-full p-2 border rounded dark:bg-neutral-800 text-sm mb-1"><button @click="changePassword('APP')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update App Pass</button></div>
-                        <div><input type="text" x-model="newSettingsPass" placeholder="New Settings Password" class="w-full p-2 border rounded dark:bg-neutral-800 text-sm mb-1"><button @click="changePassword('SETTINGS')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update Settings Pass</button></div>
-                   </div>
+               <div class="border-t pt-4 dark:border-neutral-700">
+                    <h3 class="font-bold mb-3 text-sm text-gray-500 dark:text-neutral-300">Security</h3>
+                    <div class="mb-3"><input type="text" x-model="newAppPass" placeholder="New App Password" class="w-full p-2 border rounded dark:bg-neutral-800 text-sm mb-1"><button @click="changePassword('APP')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update App Pass</button></div>
+                    <div><input type="text" x-model="newSettingsPass" placeholder="New Settings Password" class="w-full p-2 border rounded dark:bg-neutral-800 text-sm mb-1"><button @click="changePassword('SETTINGS')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update Settings Pass</button></div>
                </div>
            </div>
        </div>

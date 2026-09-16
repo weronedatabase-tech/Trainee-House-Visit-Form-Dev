@@ -3,7 +3,9 @@
 // (Environment settings are now managed in config.js)
 // =====================================================================
 
-const SPREADSHEET_ID = APP_ENVIRONMENT === "Exp" ? EXP_SPREADSHEET_ID : PROD_SPREADSHEET_ID;
+function getSpreadsheetId() {
+  return typeof APP_ENVIRONMENT !== 'undefined' && APP_ENVIRONMENT === "Exp" ? EXP_SPREADSHEET_ID : PROD_SPREADSHEET_ID;
+}
 
 const FORM_SHEET_NAME = "Form Responses 1";
 const LOOKUP_SHEET_NAME = "lookup";
@@ -19,7 +21,7 @@ function doGet(e) {
   return ContentService.createTextOutput(JSON.stringify({ 
     status: "Online", 
     version: "v20",
-    mode: APP_ENVIRONMENT === "Exp" ? "Experimentation" : "Production"
+    mode: typeof APP_ENVIRONMENT !== 'undefined' && APP_ENVIRONMENT === "Exp" ? "Experimentation" : "Production"
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -42,7 +44,7 @@ function doPost(e) {
       return sendJSON({ success: true });
     }
 
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const ss = SpreadsheetApp.openById(getSpreadsheetId());
     const formSheet = ss.getSheetByName(FORM_SHEET_NAME);
     const lookupSheet = ss.getSheetByName(LOOKUP_SHEET_NAME);
     const mappingSheet = ss.getSheetByName(MAPPING_SHEET_NAME);
