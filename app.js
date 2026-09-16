@@ -502,11 +502,18 @@ function appData() {
            this.showSettings = true; 
        },
        
-       unlockSettings() { 
-           if (this.settingsPass === 'werone') {
-               this.settingsUnlocked = true; 
-           } else {
-               this.settingsError = 'Wrong Password';
+       async unlockSettings() { 
+           this.settingsError = 'Verifying...';
+           try {
+               const data = await this.performAction('validateSettings', { password: this.settingsPass });
+               if (data.success) {
+                   this.settingsUnlocked = true; 
+                   this.settingsError = '';
+               } else {
+                   this.settingsError = 'Wrong Password';
+               }
+           } catch(e) {
+               this.settingsError = 'Connection Error.';
            }
        },
        
@@ -518,7 +525,25 @@ function appData() {
            this.performAction('renameColumn', { colIndex: idx, newName: name }); 
        },
        
-       changePassword() { 
+       async changePassword(type) { 
+           const newPass = type === 'APP' ? this.newAppPass : this.newSettingsPass;
+           if (!newPass) {
+               this.settingsError = 'Password cannot be empty.';
+               return;
+           }
+           this.settingsError = 'Updating password...';
+           try {
+               const data = await this.performAction('changePassword', { type, newPassword: newPass });
+               if (data.success) {
+                   this.settingsError = type + ' password updated successfully!';
+                   if (type === 'APP') this.newAppPass = '';
+                   if (type === 'SETTINGS') this.newSettingsPass = '';
+               } else {
+                   this.settingsError = 'Failed to update password.';
+               }
+           } catch(e) {
+               this.settingsError = 'Connection Error.';
+           }
        },
        
        showToast(m, t) { 
