@@ -259,65 +259,94 @@ function doPost(e) {
         for (let i = 0; i < 100; i++) {
           let row = [];
           headers.forEach(h => {
-            const lowerH = String(h).toLowerCase();
-            if (lowerH.includes("timestamp") || lowerH.includes("date of visit")) {
-               // Generate random date in the past year
+            const rawH = String(h);
+            const lowerH = rawH.toLowerCase();
+            
+            // Replicate App.js field detection logic
+            const isDate = lowerH.includes('date') || lowerH.includes('dob') || lowerH.includes('birthday') || lowerH.includes('timestamp');
+            const isLikertScale = lowerH.includes('mobility') || lowerH.includes('comprehension') || lowerH.includes('verbal');
+            const isProjectField = lowerH.trim() === 'project';
+            const shortKeywords = ['name','nric','gender','sex','race','religion','blood','height','weight','shirt','relation','contact','mobile','phone','email'];
+            const isShortInput = shortKeywords.some(k => lowerH.includes(k));
+            const isLongText = !isDate && !isShortInput && !isProjectField && !isLikertScale;
+
+            if (lowerH.includes("timestamp") || (isDate && lowerH.includes("visit"))) {
                row.push(new Date(Date.now() - Math.floor(Math.random() * 31536000000)));
-            } else if (lowerH.includes("date of birth") || lowerH.includes("dob")) {
-               // Generate random date between 20 and 60 years ago
+            } else if (isDate) {
+               // E.g., Date of birth
                const start = new Date(1960, 0, 1).getTime();
                const end = new Date(2005, 0, 1).getTime();
                row.push(new Date(start + Math.random() * (end - start)));
-            } else if (lowerH.includes("name") && lowerH.includes("trainee")) {
-               row.push(mockTrainees[i]);
-            } else if (lowerH.includes("volunteer")) {
-               const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
-               const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
-               row.push(randomFirst + " " + randomLast);
-            } else if (lowerH.includes("project")) {
+            } else if (isLikertScale) {
+               row.push(Math.floor(Math.random() * 5) + 1);
+            } else if (isProjectField) {
                row.push("Mock Project " + (Math.floor(Math.random() * 5) + 1));
-            } else if (lowerH.includes("nric") || lowerH.includes("id")) {
-               row.push(Math.floor(Math.random() * 900 + 100) + String.fromCharCode(65 + Math.floor(Math.random() * 26))); // e.g. 123A
-            } else if (lowerH.includes("address")) {
-               const blk = Math.floor(Math.random() * 900) + 1;
-               const street = streets[Math.floor(Math.random() * streets.length)];
-               const unit = "#" + (Math.floor(Math.random() * 20) + 1) + "-" + (Math.floor(Math.random() * 900) + 100);
-               row.push("Blk " + blk + " " + street + " " + unit);
-            } else if (lowerH.includes("blood type")) {
-               const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-               row.push(bloodTypes[Math.floor(Math.random() * bloodTypes.length)]);
-            } else if (lowerH.includes("contact") || lowerH.includes("phone") || lowerH.includes("mobile")) {
-               row.push("8" + Math.floor(Math.random() * 9000000 + 1000000));
-            } else if (lowerH.includes("gender") || lowerH.includes("sex")) {
-               row.push(Math.random() > 0.5 ? "Male" : "Female");
-            } else if (lowerH.includes("race") || lowerH.includes("ethnicity")) {
-               const races = ["Chinese", "Malay", "Indian", "Eurasian", "Others"];
-               row.push(races[Math.floor(Math.random() * races.length)]);
-            } else if (lowerH.includes("status")) {
-               const statuses = ["Active", "Pending", "Completed", "Follow-up Needed"];
-               row.push(statuses[Math.floor(Math.random() * statuses.length)]);
-            } else if (lowerH.includes("pressure") || lowerH.includes("bp")) {
-               row.push((Math.floor(Math.random() * 40) + 100) + "/" + (Math.floor(Math.random() * 20) + 70));
-            } else if (lowerH.includes("heart rate") || lowerH.includes("pulse")) {
-               row.push(Math.floor(Math.random() * 40) + 60);
-            } else if (lowerH.includes("weight")) {
-               row.push((Math.floor(Math.random() * 40) + 50) + " kg");
-            } else if (lowerH.includes("height")) {
-               row.push((Math.floor(Math.random() * 40) + 150) + " cm");
-            } else if (lowerH.includes("email")) {
-               row.push("mock" + i + "@example.com");
-            } else if (lowerH.includes("is ") || lowerH.includes("has ") || lowerH.includes("did ") || lowerH.includes("can ")) {
-               row.push(Math.random() > 0.5 ? "Yes" : "No");
-            } else if (lowerH.includes("remark") || lowerH.includes("note") || lowerH.includes("feedback") || lowerH.includes("comment")) {
-               const notes = ["Session went well, making good progress.", "Needs more attention on the physical exercises next time.", "Engaged actively and communicated clearly.", "A bit tired today, kept session light.", "Excellent participation.", "Follow up required next week regarding the new routine.", "No major issues to report."];
-               row.push(notes[Math.floor(Math.random() * notes.length)]);
-            } else {
-               // For general fields, if it looks like a question, use Likert mostly, else text
-               if (lowerH.includes("how") || lowerH.includes("rate") || lowerH.includes("level") || lowerH.includes("score")) {
-                  row.push(Math.floor(Math.random() * 5) + 1); // Mock likert
+            } else if (isShortInput) {
+               if (lowerH.includes("name") && lowerH.includes("trainee")) {
+                  row.push(mockTrainees[i]);
+               } else if (lowerH.includes("name") || lowerH.includes("volunteer")) {
+                  const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+                  const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+                  row.push(randomFirst + " " + randomLast);
+               } else if (lowerH.includes("nric") || lowerH.includes("id")) {
+                  row.push(Math.floor(Math.random() * 900 + 100) + String.fromCharCode(65 + Math.floor(Math.random() * 26)));
+               } else if (lowerH.includes("blood")) {
+                  const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+                  row.push(bloodTypes[Math.floor(Math.random() * bloodTypes.length)]);
+               } else if (lowerH.includes("contact") || lowerH.includes("phone") || lowerH.includes("mobile")) {
+                  row.push("8" + Math.floor(Math.random() * 9000000 + 1000000));
+               } else if (lowerH.includes("gender") || lowerH.includes("sex")) {
+                  row.push(Math.random() > 0.5 ? "Male" : "Female");
+               } else if (lowerH.includes("race") || lowerH.includes("ethnicity")) {
+                  const races = ["Chinese", "Malay", "Indian", "Eurasian", "Others"];
+                  row.push(races[Math.floor(Math.random() * races.length)]);
+               } else if (lowerH.includes("religion")) {
+                  const rel = ["Buddhism", "Christianity", "Islam", "Hinduism", "Free Thinker", "Others"];
+                  row.push(rel[Math.floor(Math.random() * rel.length)]);
+               } else if (lowerH.includes("shirt")) {
+                  const sizes = ["S", "M", "L", "XL", "XXL"];
+                  row.push(sizes[Math.floor(Math.random() * sizes.length)]);
+               } else if (lowerH.includes("relation")) {
+                  const rels = ["Mother", "Father", "Sibling", "Spouse", "Child", "Guardian"];
+                  row.push(rels[Math.floor(Math.random() * rels.length)]);
+               } else if (lowerH.includes("weight")) {
+                  row.push((Math.floor(Math.random() * 40) + 50) + " kg");
+               } else if (lowerH.includes("height")) {
+                  row.push((Math.floor(Math.random() * 40) + 150) + " cm");
+               } else if (lowerH.includes("email")) {
+                  row.push("mock" + i + "@example.com");
                } else {
-                  row.push("Mock text entry");
+                  row.push("Short Text Entry");
                }
+            } else if (isLongText) {
+               if (lowerH.includes("address")) {
+                  const blk = Math.floor(Math.random() * 900) + 1;
+                  const street = streets[Math.floor(Math.random() * streets.length)];
+                  const unit = "#" + (Math.floor(Math.random() * 20) + 1) + "-" + (Math.floor(Math.random() * 900) + 100);
+                  row.push("Blk " + blk + " " + street + " " + unit);
+               } else if (lowerH.includes("pressure") || lowerH.includes("bp")) {
+                  row.push((Math.floor(Math.random() * 40) + 100) + "/" + (Math.floor(Math.random() * 20) + 70));
+               } else if (lowerH.includes("heart rate") || lowerH.includes("pulse")) {
+                  row.push(Math.floor(Math.random() * 40) + 60);
+               } else if (lowerH.includes("status")) {
+                  const statuses = ["Active", "Pending", "Completed", "Follow-up Needed"];
+                  row.push(statuses[Math.floor(Math.random() * statuses.length)]);
+               } else if (lowerH.includes("is ") || lowerH.includes("has ") || lowerH.includes("did ") || lowerH.includes("can ")) {
+                  row.push(Math.random() > 0.5 ? "Yes" : "No");
+               } else {
+                  const notes = [
+                     "Session went very well today, making good overall progress.", 
+                     "Needs more attention on the physical exercises next time.", 
+                     "Engaged actively and communicated clearly with the team.", 
+                     "A bit tired today, kept the session light and easy.", 
+                     "Excellent participation and high energy levels observed.", 
+                     "Follow up required next week regarding the new routine.", 
+                     "No major issues to report, continuing with current plan."
+                  ];
+                  row.push(notes[Math.floor(Math.random() * notes.length)]);
+               }
+            } else {
+               row.push("Mock Data");
             }
           });
           mockDataRows.push(row);
