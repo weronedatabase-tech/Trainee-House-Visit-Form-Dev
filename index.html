@@ -316,6 +316,12 @@
                     <div class="mb-3"><input type="text" x-model="newAppPass" placeholder="New App Password" class="w-full p-2 border rounded dark:bg-neutral-800 text-sm mb-1"><button @click="changePassword('APP')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update App Pass</button></div>
                     <div><input type="text" x-model="newSettingsPass" placeholder="New Settings Password" class="w-full p-2 border rounded dark:bg-neutral-800 text-sm mb-1"><button @click="changePassword('SETTINGS')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update Settings Pass</button></div>
                </div>
+               
+               <div x-show="isExpMode" class="border-t pt-4 dark:border-neutral-700">
+                    <h3 class="font-bold mb-3 text-sm text-gray-500 dark:text-neutral-300">Experimentation</h3>
+                    <button @click="generateMockData" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-bold text-sm transition">Generate Mock Data Sheet</button>
+                    <div x-show="mockDataMsg" class="mt-2 text-xs text-center font-medium" :class="mockDataError ? 'text-red-500' : 'text-green-500'" x-text="mockDataMsg"></div>
+               </div>
            </div>
        </div>
    </div>

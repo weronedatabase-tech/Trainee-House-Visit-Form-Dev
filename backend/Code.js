@@ -222,6 +222,78 @@ function doPost(e) {
       return sendJSON({ success: true });
     }
 
+    if (action === 'generateMockData') {
+      if (typeof APP_ENVIRONMENT === 'undefined' || APP_ENVIRONMENT !== "Exp") {
+        return sendJSON({ error: "Only available in Experimentation mode." });
+      }
+      
+      const file = DriveApp.getFileById(ss.getId());
+      const parents = file.getParents();
+      let folder = DriveApp.getRootFolder();
+      if (parents.hasNext()) {
+        folder = parents.next();
+      }
+      
+      const newFile = file.makeCopy("Mock Data - " + ss.getName(), folder);
+      const mockSS = SpreadsheetApp.openById(newFile.getId());
+      
+      const mFormSheet = mockSS.getSheetByName(FORM_SHEET_NAME);
+      const mLookupSheet = mockSS.getSheetByName(LOOKUP_SHEET_NAME);
+      
+      if (mFormSheet) {
+        if (mFormSheet.getLastRow() > 1) {
+          mFormSheet.getRange(2, 1, mFormSheet.getLastRow() - 1, mFormSheet.getLastColumn()).clearContent();
+        }
+        
+        const headers = mFormSheet.getRange(1, 1, 1, mFormSheet.getLastColumn()).getValues()[0];
+        const mockDataRows = [];
+        const mockTrainees = [];
+        for (let i = 1; i <= 100; i++) {
+           mockTrainees.push("Mock Trainee " + i);
+        }
+        
+        for (let i = 0; i < 100; i++) {
+          let row = [];
+          headers.forEach(h => {
+            const lowerH = String(h).toLowerCase();
+            if (lowerH.includes("timestamp") || lowerH.includes("date")) {
+               // Generate random date in the past year
+               row.push(new Date(Date.now() - Math.floor(Math.random() * 31536000000)));
+            } else if (lowerH.includes("name") && lowerH.includes("trainee")) {
+               row.push(mockTrainees[i]);
+            } else if (lowerH.includes("project")) {
+               row.push("Mock Project " + (Math.floor(Math.random() * 5) + 1));
+            } else {
+               // Random data
+               if (Math.random() > 0.5) {
+                  row.push(Math.floor(Math.random() * 5) + 1); // Mock likert
+               } else {
+                  row.push("Mock text for " + h + " " + i);
+               }
+            }
+          });
+          mockDataRows.push(row);
+        }
+        
+        if (mockDataRows.length > 0) {
+          mFormSheet.getRange(mFormSheet.getLastRow() + 1, 1, mockDataRows.length, headers.length).setValues(mockDataRows);
+        }
+        
+        if (mLookupSheet) {
+          if (mLookupSheet.getLastRow() > 1) {
+            mLookupSheet.getRange(2, 1, mLookupSheet.getLastRow() - 1, mLookupSheet.getLastColumn()).clearContent();
+          }
+          const lHeaders = mLookupSheet.getRange(1, 1, 1, mLookupSheet.getLastColumn()).getValues()[0];
+          let nameCol = lHeaders.findIndex(h => String(h).toLowerCase().includes("name") || String(h).toLowerCase().includes("trainee"));
+          if (nameCol === -1) nameCol = 0;
+          const traineeRows = mockTrainees.map(t => [t]);
+          mLookupSheet.getRange(mLookupSheet.getLastRow() + 1, nameCol + 1, traineeRows.length, 1).setValues(traineeRows);
+        }
+      }
+      
+      return sendJSON({ success: true });
+    }
+
     return sendJSON({ error: "Unknown Action" });
 
   } catch (err) { return sendJSON({ success: false, error: err.toString() }); }

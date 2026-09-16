@@ -42,7 +42,7 @@ function appData() {
        toast: { visible: false, message: '', type: 'success' },
        headers: [], trainees: [], projects:[], mapping: {}, sectionOrder:[], searchQuery: '', loadingTrainees: false,
        formData: {}, isSubmitting: false, isLoading: false, loadingText: 'Please wait...',
-       showSettings: false, settingsPass: '', showSettingsPass: false, settingsUnlocked: false, settingsError: '', 
+       showSettings: false, settingsPass: '', showSettingsPass: false, settingsUnlocked: false, settingsError: '', mockDataMsg: '', mockDataError: false,
        newColumnName: '', newAppPass: '', newSettingsPass: '',
        
        expandedSections: {},
@@ -543,6 +543,32 @@ function appData() {
                }
            } catch(e) {
                this.settingsError = 'Connection Error.';
+           }
+       },
+       
+       async generateMockData() {
+           if (!this.isExpMode) return;
+           this.mockDataError = false;
+           this.mockDataMsg = 'Generating mock data... this may take up to a minute.';
+           this.isLoading = true;
+           this.loadingText = 'Generating mock data...';
+           try {
+               const data = await this.performAction('generateMockData');
+               if (data.success) {
+                   this.mockDataMsg = 'Mock data sheet created successfully! Check your Google Drive for "Mock Data - ..."';
+                   this.mockDataError = false;
+                   this.showToast('Mock Data Generated', 'success');
+               } else {
+                   this.mockDataMsg = data.error || 'Failed to generate mock data.';
+                   this.mockDataError = true;
+                   this.showToast('Generation Failed', 'error');
+               }
+           } catch (e) {
+               this.mockDataMsg = 'Connection Error.';
+               this.mockDataError = true;
+           } finally {
+               this.isLoading = false;
+               this.loadingText = 'Loading...';
            }
        },
        
