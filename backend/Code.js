@@ -1,13 +1,9 @@
 // =====================================================================
-// 2. BACKEND ENVIRONMENT TOGGLE 
-// Change this single value to "Dev" or "Prod"
+// 2. BACKEND ENVIRONMENT CONFIGURATION
+// (Environment settings are now managed in config.js)
 // =====================================================================
-const ENVIRONMENT = "Dev"; 
 
-const DEV_SPREADSHEET_ID = "1C5C_9Wc-20DG-fBVn6OlLyvAqJnMXTIejR5SN1Dzk5M";
-const PROD_SPREADSHEET_ID = "1tbw59RW6wDpe49V4mXohUaT4l2g8IpUrXh_qux3oa3c";
-
-const SPREADSHEET_ID = ENVIRONMENT === "Dev" ? DEV_SPREADSHEET_ID : PROD_SPREADSHEET_ID;
+const SPREADSHEET_ID = APP_ENVIRONMENT === "Exp" ? EXP_SPREADSHEET_ID : PROD_SPREADSHEET_ID;
 
 const FORM_SHEET_NAME = "Form Responses 1";
 const LOOKUP_SHEET_NAME = "lookup";
@@ -22,8 +18,8 @@ function setupPasswords() {
 function doGet(e) {
   return ContentService.createTextOutput(JSON.stringify({ 
     status: "Online", 
-    version: "v19",
-    mode: ENVIRONMENT === "Dev" ? "Development" : "Production"
+    version: "v20",
+    mode: APP_ENVIRONMENT === "Exp" ? "Experimentation" : "Production"
   })).setMimeType(ContentService.MimeType.JSON);
 }
 

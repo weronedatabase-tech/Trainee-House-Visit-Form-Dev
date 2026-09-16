@@ -1,15 +1,11 @@
 // =====================================================================
-// 1. FRONTEND ENVIRONMENT TOGGLE
-// Change this single value to "Dev" or "Prod"
+// 1. FRONTEND ENVIRONMENT CONFIGURATION
+// (Environment settings are now managed in /backend/config.js)
 // =====================================================================
-const ENVIRONMENT = "Dev"; 
-
-const DEV_API_URL = 'https://script.google.com/macros/s/AKfycbzsU73hNlYm9vqAY4Mn80s_6KMP79eLCi11u8d56NkO_1iDp7a0ew09OWOdvfhzK75T/exec';
-const PROD_API_URL = 'https://script.google.com/macros/s/AKfycbw21ZGdd-SfmRJrB-zMcfzVKTzIG-hU-BwKaA33J1bukq-4_ZJGQfH6_KBr4LdgjZvXmw/exec';
 
 const CONFIG = {
-   ENVIRONMENT: ENVIRONMENT,
-   API_URL: ENVIRONMENT === "Dev" ? DEV_API_URL : PROD_API_URL,
+   ENVIRONMENT: APP_ENVIRONMENT,
+   API_URL: APP_ENVIRONMENT === "Exp" ? EXP_API_URL : PROD_API_URL,
    
    STATIC_GUIDES: { 
        'life skills': 'Can trainee carry out daily activities like bathing, dressing, eating independently? Household chores? Use telephone? Public transport?', 
@@ -36,7 +32,7 @@ const CONFIG = {
 // =====================================================================
 function appData() {
    return {
-       isDevMode: CONFIG.ENVIRONMENT === 'Dev',
+       isExpMode: CONFIG.ENVIRONMENT === 'Exp',
        view: 'dashboard', 
        darkMode: localStorage.getItem('theme') === 'dark',
        isLoggedIn: false, // Always starts as false to force login
@@ -382,7 +378,7 @@ function appData() {
                if(l.includes('abilit')||l.includes('behavio')) return {bgClass:'bg-purple-50 dark:bg-purple-900', textClass:'text-purple-700 dark:text-purple-200'};
                if(l.includes('school')||l.includes('work')) return {bgClass:'bg-indigo-50 dark:bg-indigo-900', textClass:'text-indigo-800 dark:text-indigo-200'};
                if(l.includes('observation')) return {bgClass:'bg-pink-50 dark:bg-pink-900', textClass:'text-pink-700 dark:text-pink-200'};
-               return {bgClass:'bg-slate-100 dark:bg-gray-800', textClass:'text-slate-600 dark:text-slate-400'};
+               return {bgClass:'bg-slate-100 dark:bg-neutral-900', textClass:'text-slate-600 dark:text-slate-400'};
            };
 
            groups = orderToUse.map(title => ({ title: title, fields:[], ...getColors(title) }));

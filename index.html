@@ -33,7 +33,7 @@
                'bg-purple-50', 'dark:bg-purple-900', 'text-purple-700', 'dark:text-purple-200',
                'bg-indigo-50', 'dark:bg-indigo-900', 'text-indigo-800', 'dark:text-indigo-200',
                'bg-pink-50', 'dark:bg-pink-900', 'text-pink-700', 'dark:text-pink-200',
-               'bg-slate-100', 'dark:bg-gray-800', 'text-slate-600', 'dark:text-slate-400'
+               'bg-slate-100', 'dark:bg-neutral-900', 'text-slate-600', 'dark:text-slate-400'
            ]
        }
    </script>
@@ -44,12 +44,12 @@
        document.write('<link rel="stylesheet" href="styles.css?v=' + cacheBuster + '">');
    </script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200 min-h-screen"
+<body class="bg-gray-50 dark:bg-black text-gray-800 dark:text-neutral-100 transition-colors duration-200 min-h-screen"
      x-data="appData()" x-init="initApp()">
 
    <!-- LOADING -->
    <div x-show="isLoading" x-transition.opacity class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm" x-cloak>
-       <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl flex flex-col items-center">
+       <div class="bg-white dark:bg-neutral-900 p-6 rounded-2xl shadow-xl flex flex-col items-center">
            <svg class="animate-spin h-10 w-10 text-primary mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
            <span class="font-bold text-gray-800 dark:text-white" x-text="loadingText">Loading...</span>
        </div>
@@ -62,13 +62,13 @@
 
    <!-- STICKY TOP CONTAINER (Banner + Header) -->
    <div class="sticky top-0 z-40 shadow">
-       <!-- DEV MODE BANNER -->
-       <div x-show="isDevMode" class="bg-red-600 text-white text-center text-xs font-bold py-1 tracking-widest uppercase" x-cloak>
-           Dev Mode
+       <!-- EXP MODE BANNER -->
+       <div x-show="isExpMode" class="bg-purple-600 text-white text-center text-xs font-bold py-1 tracking-widest uppercase" x-cloak>
+           EXPERIMENTATION
        </div>
        
        <!-- HEADER -->
-       <header class="bg-white dark:bg-gray-800 p-4 flex justify-between items-center">
+       <header class="bg-white dark:bg-neutral-900 p-4 flex justify-between items-center">
            <h1 class="text-xl font-bold text-green-600 dark:text-green-400">House Visit Form</h1>
            <div class="flex items-center gap-3">
                <button @click="openSettings" class="text-gray-500 hover:text-primary transition" title="Settings">
@@ -84,13 +84,13 @@
 
    <!-- LOGIN -->
    <div x-show="!isLoggedIn" class="flex flex-col items-center justify-center min-h-[80vh] p-6">
-       <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-sm">
+       <div class="bg-white dark:bg-neutral-900 p-8 rounded-lg shadow-xl w-full max-w-sm">
            <h2 class="text-2xl font-bold mb-6 text-center">Volunteer Login</h2>
            <div x-show="loginError" class="bg-red-100 text-red-700 p-2 rounded mb-4 text-sm text-center" x-text="loginError"></div>
            
            <div class="relative w-full mb-4">
                <input :type="showLoginPass ? 'text' : 'password'" x-model="loginPass" @keyup.enter="performLogin" placeholder="Enter Password" 
-                      class="w-full p-3 border rounded dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary outline-none">
+                      class="w-full p-3 border rounded dark:bg-neutral-800 dark:border-neutral-700 focus:ring-2 focus:ring-primary outline-none">
                <button type="button" @click="showLoginPass = !showLoginPass" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-primary">
                    <svg x-show="!showLoginPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                    <svg x-show="showLoginPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
@@ -106,24 +106,24 @@
        
        <!-- DASHBOARD -->
        <div x-show="view === 'dashboard'">
-           <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border dark:border-gray-700">
+           <div class="mb-6 bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-sm border dark:border-neutral-800">
                <div class="flex justify-between items-center mb-4">
                    <h2 class="text-lg font-semibold">Find Trainee</h2>
-                   <span class="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                   <span class="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-neutral-400">
                        <span x-text="trainees.length"></span> Loaded
                    </span>
                </div>
                
                <div class="relative">
-                   <input type="text" x-model="searchQuery" @focus="refreshTrainees" placeholder="Search name..." class="w-full p-3 pl-4 border rounded-lg text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none focus:border-primary">
-                   <div x-show="searchQuery.length > 0" class="mt-2 max-h-60 overflow-y-auto border rounded-lg dark:border-gray-700">
+                   <input type="text" x-model="searchQuery" @focus="refreshTrainees" placeholder="Search name..." class="w-full p-3 pl-4 border rounded-lg text-gray-900 dark:text-neutral-100 dark:bg-neutral-800 dark:border-neutral-700 outline-none focus:border-primary">
+                   <div x-show="searchQuery.length > 0" class="mt-2 max-h-60 overflow-y-auto border rounded-lg dark:border-neutral-800">
                        <template x-for="trainee in filteredTrainees" :key="trainee">
-                           <div @click="loadTraineeForm(trainee)" class="p-3 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b dark:border-gray-700 flex justify-between items-center">
-                               <span x-text="trainee" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                           <div @click="loadTraineeForm(trainee)" class="p-3 bg-white dark:bg-neutral-900 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer border-b dark:border-neutral-800 flex justify-between items-center">
+                               <span x-text="trainee" class="font-medium text-gray-800 dark:text-neutral-200"></span>
                                <span class="text-xs font-semibold text-indigo-700 bg-indigo-100 dark:text-indigo-100 dark:bg-indigo-600 px-3 py-1 rounded-full">Fill Form</span>
                            </div>
                        </template>
-                       <div x-show="filteredTrainees.length === 0" class="p-3 text-gray-500 bg-white dark:bg-gray-800 text-center">No matches found</div>
+                       <div x-show="filteredTrainees.length === 0" class="p-3 text-gray-500 bg-white dark:bg-neutral-900 text-center">No matches found</div>
                    </div>
                </div>
                <div class="mt-2 text-xs text-gray-400">Pulls list from 'lookup' tab</div>
@@ -148,11 +148,11 @@
                </div>
 
                <template x-for="(section, secIndex) in groupedHeaders" :key="secIndex">
-                   <div class="mb-6 rounded-lg overflow-hidden shadow-sm border dark:border-gray-700 bg-white dark:bg-gray-800">
+                   <div class="mb-6 rounded-lg overflow-hidden shadow-sm border dark:border-neutral-800 bg-white dark:bg-neutral-900">
                        
                        <!-- HEADER (ACCORDION) WITH COLORS -->
                        <div @click="toggleSection(section.title)" 
-                            class="p-4 font-bold uppercase text-sm tracking-wide border-b dark:border-gray-600 cursor-pointer flex justify-between items-center select-none" 
+                            class="p-4 font-bold uppercase text-sm tracking-wide border-b dark:border-neutral-700 cursor-pointer flex justify-between items-center select-none" 
                             :class="section.bgClass + ' ' + section.textClass">
                             <div>
                                <div x-text="section.title"></div>
@@ -168,23 +168,23 @@
                            <div class="p-4 space-y-5">
                                <template x-for="field in section.fields" :key="field.index">
                                    <div>
-                                       <label class="block text-sm font-semibold mb-1 text-gray-800 dark:text-gray-200" x-text="field.label"></label>
-                                       <p x-show="field.guide" class="text-xs text-gray-500 dark:text-gray-400 mb-2 italic" x-text="field.guide"></p>
+                                       <label class="block text-sm font-semibold mb-1 text-gray-800 dark:text-neutral-200" x-text="field.label"></label>
+                                       <p x-show="field.guide" class="text-xs text-gray-500 dark:text-neutral-400 mb-2 italic" x-text="field.guide"></p>
                                        
                                        <!-- NEW IMPROVED LIKERT SCALE COMPONENT -->
                                        <template x-if="isLikertScale(field.label)">
-                                           <div class="mt-2 mb-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700 shadow-inner">
+                                           <div class="mt-2 mb-4 bg-gray-50 dark:bg-black p-4 rounded-xl border dark:border-neutral-800 shadow-inner">
                                                <!-- Likert Labels -->
                                                <div class="flex justify-between items-end mb-3">
-                                                   <span class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 leading-snug w-1/2 text-left pr-2 font-medium" x-text="getLikertLabel(field.label, 'left')"></span>
-                                                   <span class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 leading-snug w-1/2 text-right pl-2 font-medium" x-text="getLikertLabel(field.label, 'right')"></span>
+                                                   <span class="text-[11px] sm:text-xs text-gray-500 dark:text-neutral-400 leading-snug w-1/2 text-left pr-2 font-medium" x-text="getLikertLabel(field.label, 'left')"></span>
+                                                   <span class="text-[11px] sm:text-xs text-gray-500 dark:text-neutral-400 leading-snug w-1/2 text-right pl-2 font-medium" x-text="getLikertLabel(field.label, 'right')"></span>
                                                </div>
                                                <!-- Likert Options (1 to 5) -->
                                                <div class="flex justify-between gap-2 sm:gap-3">
                                                    <template x-for="val in [1, 2, 3, 4, 5]" :key="val">
                                                        <label class="flex-1 cursor-pointer group">
                                                            <input type="radio" :name="'likert-'+field.index" :value="val" x-model="formData[field.index]" class="peer sr-only">
-                                                           <div class="py-2.5 sm:py-3 flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary shadow-sm transition-all font-bold text-sm sm:text-base group-hover:bg-gray-50 dark:group-hover:bg-gray-700">
+                                                           <div class="py-2.5 sm:py-3 flex items-center justify-center rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-700 dark:text-neutral-200 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary shadow-sm transition-all font-bold text-sm sm:text-base group-hover:bg-gray-50 dark:group-hover:bg-neutral-800">
                                                                <span x-text="val"></span>
                                                            </div>
                                                        </label>
@@ -194,7 +194,7 @@
                                        </template>
 
                                        <template x-if="isProjectField(field.label)">
-                                           <select x-model="formData[field.index]" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 outline-none bg-white dark:bg-gray-700">
+                                           <select x-model="formData[field.index]" class="w-full p-3 border rounded-lg dark:bg-neutral-800 dark:border-neutral-700 outline-none bg-white dark:bg-neutral-800">
                                                <option value="">Select Project...</option>
                                                <template x-for="opt in projects" :key="opt"><option :value="opt" x-text="opt"></option></template>
                                            </select>
@@ -205,16 +205,16 @@
                                            <div class="relative">
                                                <input type="text" readonly :value="formatDateDisplay(formData[field.index])" placeholder="Select Date" 
                                                       @click="openDatePicker(field.index)"
-                                                      class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 outline-none bg-white dark:bg-gray-700 cursor-pointer text-gray-800 dark:text-gray-100">
+                                                      class="w-full p-3 border rounded-lg dark:bg-neutral-800 dark:border-neutral-700 outline-none bg-white dark:bg-neutral-800 cursor-pointer text-gray-800 dark:text-neutral-100">
                                            </div>
                                        </template>
 
                                        <template x-if="isLongText(field.label) && !isLikertScale(field.label)">
-                                           <textarea x-model="formData[field.index]" rows="3" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 outline-none min-h-[100px]"></textarea>
+                                           <textarea x-model="formData[field.index]" rows="3" class="w-full p-3 border rounded-lg dark:bg-neutral-800 dark:border-neutral-700 outline-none min-h-[100px]"></textarea>
                                        </template>
                                        
                                        <template x-if="isShortInput(field.label) && !isProjectField(field.label)">
-                                           <input type="text" x-model="formData[field.index]" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 outline-none">
+                                           <input type="text" x-model="formData[field.index]" class="w-full p-3 border rounded-lg dark:bg-neutral-800 dark:border-neutral-700 outline-none">
                                        </template>
                                    </div>
                                </template>
@@ -225,7 +225,7 @@
                <div class="h-24"></div>
                
                <!-- FOOTER (NO SAVE LATER) -->
-               <div class="fixed bottom-0 left-0 w-full p-4 bg-white dark:bg-gray-900 border-t dark:border-gray-700 flex z-20 shadow-lg">
+               <div class="fixed bottom-0 left-0 w-full p-4 bg-white dark:bg-black border-t dark:border-neutral-800 flex z-20 shadow-lg">
                    <button type="submit" class="w-full bg-primary text-white p-3 rounded-lg font-bold shadow-md hover:bg-indigo-700 transition">Submit</button>
                </div>
            </form>
@@ -233,13 +233,13 @@
 
        <!-- ROLODEX DATE PICKER MODAL -->
        <div x-show="showDatePicker" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" x-cloak>
-           <div class="bg-white dark:bg-gray-800 w-full sm:w-96 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform transition-all" @click.away="closeDatePicker()">
+           <div class="bg-white dark:bg-neutral-900 w-full sm:w-96 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform transition-all" @click.away="closeDatePicker()">
                <div class="flex justify-between items-center mb-6">
-                   <h3 class="font-bold text-lg text-gray-800 dark:text-gray-100">Select Date</h3>
+                   <h3 class="font-bold text-lg text-gray-800 dark:text-neutral-100">Select Date</h3>
                    <button @click="closeDatePicker()" class="text-gray-500 hover:text-gray-800 dark:hover:text-white text-xl">✕</button>
                </div>
                
-               <div class="flex justify-between gap-2 h-48 relative bg-gray-50 dark:bg-gray-900 rounded-xl border dark:border-gray-700 overflow-hidden">
+               <div class="flex justify-between gap-2 h-48 relative bg-gray-50 dark:bg-black rounded-xl border dark:border-neutral-800 overflow-hidden">
                    <!-- Selection Highlight Overlay -->
                    <div class="absolute top-1/2 left-0 w-full h-10 -mt-5 bg-primary/10 border-y border-primary/30 pointer-events-none"></div>
                    
@@ -248,7 +248,7 @@
                        <div class="h-[76px]"></div>
                        <template x-for="d in daysInMonth(pickerMonth, pickerYear)" :key="d">
                            <div class="h-10 flex items-center justify-center snap-center text-lg cursor-pointer transition-colors" 
-                                :class="pickerDay === d ? 'text-primary font-bold text-xl' : 'text-gray-400 dark:text-gray-500'" 
+                                :class="pickerDay === d ? 'text-primary font-bold text-xl' : 'text-gray-400 dark:text-neutral-500'" 
                                 @click="scrollToItem('day', d)" x-text="d"></div>
                        </template>
                        <div class="h-[76px]"></div>
@@ -259,7 +259,7 @@
                        <div class="h-[76px]"></div>
                        <template x-for="(m, i) in months" :key="i">
                            <div class="h-10 flex items-center justify-center snap-center text-lg cursor-pointer transition-colors" 
-                                :class="pickerMonth === i ? 'text-primary font-bold text-xl' : 'text-gray-400 dark:text-gray-500'" 
+                                :class="pickerMonth === i ? 'text-primary font-bold text-xl' : 'text-gray-400 dark:text-neutral-500'" 
                                 @click="scrollToItem('month', i)" x-text="m"></div>
                        </template>
                        <div class="h-[76px]"></div>
@@ -270,7 +270,7 @@
                        <div class="h-[76px]"></div>
                        <template x-for="y in years" :key="y">
                            <div class="h-10 flex items-center justify-center snap-center text-lg cursor-pointer transition-colors" 
-                                :class="pickerYear === y ? 'text-primary font-bold text-xl' : 'text-gray-400 dark:text-gray-500'" 
+                                :class="pickerYear === y ? 'text-primary font-bold text-xl' : 'text-gray-400 dark:text-neutral-500'" 
                                 @click="scrollToItem('year', y)" x-text="y"></div>
                        </template>
                        <div class="h-[76px]"></div>
@@ -278,7 +278,7 @@
                </div>
                
                <div class="mt-6 flex gap-3">
-                   <button @click="closeDatePicker()" class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white p-3 rounded-lg font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
+                   <button @click="closeDatePicker()" class="flex-1 bg-gray-200 dark:bg-neutral-800 text-gray-800 dark:text-white p-3 rounded-lg font-bold hover:bg-gray-300 dark:hover:bg-neutral-700 transition">Cancel</button>
                    <button @click="confirmDatePicker()" class="flex-1 bg-primary text-white p-3 rounded-lg font-bold hover:bg-indigo-700 transition">Confirm</button>
                </div>
            </div>
@@ -286,7 +286,7 @@
 
        <!-- SETTINGS -->
        <div x-show="showSettings" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" x-cloak>
-           <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+           <div class="bg-white dark:bg-neutral-900 p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
                <div class="flex justify-between items-center mb-6">
                    <h2 class="text-xl font-bold">Settings</h2>
                    <button @click="showSettings = false" class="text-xl">✕</button>
@@ -297,7 +297,7 @@
                    <!-- SETTINGS PASSWORD WITH SHOW/HIDE -->
                    <div class="relative w-full mb-3">
                        <input :type="showSettingsPass ? 'text' : 'password'" x-model="settingsPass" @keyup.enter="unlockSettings" placeholder="Settings Password" 
-                              class="w-full p-3 border rounded dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary outline-none">
+                              class="w-full p-3 border rounded dark:bg-neutral-800 dark:border-neutral-700 focus:ring-2 focus:ring-primary outline-none">
                        <button type="button" @click="showSettingsPass = !showSettingsPass" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-primary">
                            <svg x-show="!showSettingsPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                            <svg x-show="showSettingsPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
@@ -310,10 +310,10 @@
                    <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
                        <button @click="resetAppData" class="w-full bg-red-600 text-white px-4 py-2 rounded font-bold text-sm">Reset App Data</button>
                    </div>
-                   <div class="border-t pt-4 dark:border-gray-600">
-                        <h3 class="font-bold mb-3 text-sm text-gray-500 dark:text-gray-300">Security</h3>
-                        <div class="mb-3"><input type="text" x-model="newAppPass" placeholder="New App Password" class="w-full p-2 border rounded dark:bg-gray-700 text-sm mb-1"><button @click="changePassword('APP')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update App Pass</button></div>
-                        <div><input type="text" x-model="newSettingsPass" placeholder="New Settings Password" class="w-full p-2 border rounded dark:bg-gray-700 text-sm mb-1"><button @click="changePassword('SETTINGS')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update Settings Pass</button></div>
+                   <div class="border-t pt-4 dark:border-neutral-700">
+                        <h3 class="font-bold mb-3 text-sm text-gray-500 dark:text-neutral-300">Security</h3>
+                        <div class="mb-3"><input type="text" x-model="newAppPass" placeholder="New App Password" class="w-full p-2 border rounded dark:bg-neutral-800 text-sm mb-1"><button @click="changePassword('APP')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update App Pass</button></div>
+                        <div><input type="text" x-model="newSettingsPass" placeholder="New Settings Password" class="w-full p-2 border rounded dark:bg-neutral-800 text-sm mb-1"><button @click="changePassword('SETTINGS')" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">Update Settings Pass</button></div>
                    </div>
                </div>
            </div>
@@ -323,6 +323,7 @@
    <!-- DYNAMIC CACHE-BUSTING FOR JS (Flat Hierarchy) -->
    <script>
        var cacheBuster = new Date().getTime();
+       document.write('<script src="backend/config.js?v=' + cacheBuster + '"><\/script>');
        document.write('<script src="app.js?v=' + cacheBuster + '"><\/script>');
    </script>
 </body>
