@@ -222,6 +222,13 @@ function doPost(e) {
       return sendJSON({ success: true });
     }
 
+    if (action === 'forceAuth') {
+      // Dummy calls to force Google Apps Script to auto-detect scopes for Drive and Spreadsheets
+      DriveApp.getRootFolder();
+      SpreadsheetApp.getActiveSpreadsheet();
+      return sendJSON({ success: true, message: "Authorization ping successful." });
+    }
+
     if (action === 'generateMockData') {
       if (typeof APP_ENVIRONMENT === 'undefined' || APP_ENVIRONMENT !== "Exp") {
         return sendJSON({ error: "Only available in Experimentation mode." });
