@@ -103,7 +103,7 @@ function appData() {
            if (this.isSyncing) return;
            this.isSyncing = true;
            try {
-               await this.fetchConfig();
+               await this.fetchConfig(Boolean(showToastNotification));
                if (showToastNotification) {
                    this.showToast('Sheet synchronized with latest data', 'success');
                }
@@ -320,9 +320,9 @@ function appData() {
            this.showToast('Logged out successfully', 'success');
        },
 
-       async fetchConfig() {
+       async fetchConfig(forceRefresh = false) {
            try {
-               const data = await this.performAction('getConfig');
+               const data = await this.performAction('getConfig', { forceRefresh: Boolean(forceRefresh) });
                if (data) {
                    this.headers = Array.isArray(data.headers) ? data.headers.map(String) :[];
                    
