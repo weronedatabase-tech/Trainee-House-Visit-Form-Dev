@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node server.js",
     "build": "echo 'No build step'",
+    "lint": "node --check server.js",
     "start": "node server.js"
   },
   "dependencies": {

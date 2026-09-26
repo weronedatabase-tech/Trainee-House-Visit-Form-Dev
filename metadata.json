@@ -1,0 +1,7 @@
+{
+  "name": "House Visit Form",
+  "description": "Volunteer trainee house visit evaluation form and tracking system.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

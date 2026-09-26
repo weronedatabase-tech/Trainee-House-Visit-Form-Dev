@@ -28,20 +28,23 @@ const CONFIG = {
 };
 
 // =====================================================================
-// MAIN APPLICATION LOGIC
+// MAIN APPLICATION LOGIC (Google AI Studio Multi-User Enabled)
 // =====================================================================
 function appData() {
    return {
        isExpMode: CONFIG.ENVIRONMENT === 'Exp',
        view: 'dashboard', 
        darkMode: localStorage.getItem('theme') === 'dark',
-       isLoggedIn: false, // Always starts as false to force login
+       isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true', // Session persistence per user
        loginPass: '', 
        showLoginPass: false, 
        loginError: '',
        toast: { visible: false, message: '', type: 'success' },
        headers: [], trainees: [], projects:[], mapping: {}, sectionOrder:[], searchQuery: '', loadingTrainees: false,
        formData: {}, isSubmitting: false, isLoading: false, loadingText: 'Please wait...',
+       isSyncing: false,
+       hasDraft: false,
+       currentTraineeName: '',
        showSettings: false, settingsPass: '', showSettingsPass: false, settingsUnlocked: false, settingsError: '', mockDataMsg: '', mockDataError: false, mockDataUrl: '',
        newColumnName: '', newAppPass: '', newSettingsPass: '',
        
@@ -64,7 +67,53 @@ function appData() {
        async initApp() {
            this.toggleTheme(false);
            this.loadConfigFromStorage();
-           if (navigator.onLine) this.fetchConfig();
+           if (navigator.onLine) {
+               await this.fetchConfig();
+           }
+           this.setupMultiUserSync();
+       },
+
+       // Multi-User Synchronization & Live Updates
+       setupMultiUserSync() {
+           // Auto-poll Google Sheets for fresh trainee list and form mapping every 30s when on dashboard
+           if (!window.__visitSyncInterval) {
+               window.__visitSyncInterval = setInterval(() => {
+                   if (this.isLoggedIn && this.view === 'dashboard' && navigator.onLine && !this.isSyncing) {
+                       this.syncData(false);
+                   }
+               }, 30000);
+           }
+
+           // Instantly re-sync when volunteer returns to or focuses this browser tab
+           if (!window.__visitFocusBound) {
+               window.__visitFocusBound = true;
+               const onActive = () => {
+                   if (this.isLoggedIn && this.view === 'dashboard' && navigator.onLine && !this.isSyncing) {
+                       this.syncData(false);
+                   }
+               };
+               window.addEventListener('focus', onActive);
+               document.addEventListener('visibilitychange', () => {
+                   if (document.visibilityState === 'visible') onActive();
+               });
+           }
+       },
+
+       async syncData(showToastNotification = false) {
+           if (this.isSyncing) return;
+           this.isSyncing = true;
+           try {
+               await this.fetchConfig();
+               if (showToastNotification) {
+                   this.showToast('Sheet synchronized with latest data', 'success');
+               }
+           } catch(e) {
+               if (showToastNotification) {
+                   this.showToast('Sync warning: Using cached sheet data', 'error');
+               }
+           } finally {
+               this.isSyncing = false;
+           }
        },
 
        toggleSection(title) {
@@ -140,6 +189,7 @@ function appData() {
            const m = String(this.pickerMonth + 1).padStart(2, '0');
            const d = String(this.pickerDay).padStart(2, '0');
            this.formData[this.pickerTargetIndex] = `${y}-${m}-${d}`;
+           this.saveCurrentDraft();
            this.closeDatePicker();
        },
        scrollToItem(type, value, smooth = true) {
@@ -212,8 +262,27 @@ function appData() {
            else document.documentElement.classList.remove('dark'); 
        },
        
+       // Multi-User Resilient API Caller (Express Proxy + Direct GAS Fallback)
        async performAction(action, payload = {}) {
            payload.action = action;
+
+           // 1. Try Express server proxy (/api/action)
+           // Eliminates CORS issues, avoids third-party cookie restrictions, and handles GAS lock contention
+           try {
+               const res = await fetch('/api/action', { 
+                   method: "POST", 
+                   headers: { "Content-Type": "application/json" }, 
+                   body: JSON.stringify(payload),
+                   cache: "no-store"
+               });
+               if (res.ok) {
+                   return await res.json();
+               }
+           } catch (proxyErr) {
+               console.warn("Express proxy request failed, falling back to direct GAS endpoint:", proxyErr);
+           }
+
+           // 2. Direct fallback to Google Apps Script Web App URL
            const res = await fetch(CONFIG.API_URL, { 
                method: "POST", 
                headers: { "Content-Type": "text/plain;charset=utf-8" }, 
@@ -224,49 +293,104 @@ function appData() {
        },
 
        async performLogin() {
-           this.setLoading(true);
+           this.setLoading(true, 'Verifying credentials...');
            try {
                const data = await this.performAction('login', { password: this.loginPass });
                if (data.success) { 
                    this.isLoggedIn = true; 
+                   sessionStorage.setItem('isLoggedIn', 'true');
+                   this.loginError = '';
                    await this.fetchConfig(); 
                } 
-               else this.loginError = 'Incorrect Password';
-           } catch(e) { this.loginError = 'Connection Error.'; }
-           finally { this.setLoading(false); }
+               else {
+                   this.loginError = 'Incorrect Password';
+               }
+           } catch(e) { 
+               this.loginError = 'Connection Error: ' + (e.message || 'Please check your internet'); 
+           } finally { 
+               this.setLoading(false); 
+           }
+       },
+
+       logout() {
+           sessionStorage.removeItem('isLoggedIn');
+           this.isLoggedIn = false;
+           this.loginPass = '';
+           this.view = 'dashboard';
+           this.showToast('Logged out successfully', 'success');
        },
 
        async fetchConfig() {
            try {
                const data = await this.performAction('getConfig');
-               this.headers = Array.isArray(data.headers) ? data.headers.map(String) :[];
-               
-               if (data.trainees) this.trainees = data.trainees;
-               if (data.projects) this.projects = data.projects;
-               if (data.mapping) this.mapping = data.mapping;
-               if (data.sectionOrder) this.sectionOrder = data.sectionOrder;
+               if (data) {
+                   this.headers = Array.isArray(data.headers) ? data.headers.map(String) :[];
+                   
+                   if (data.trainees) this.trainees = data.trainees;
+                   if (data.projects) this.projects = data.projects;
+                   if (data.mapping) this.mapping = data.mapping;
+                   if (data.sectionOrder) this.sectionOrder = data.sectionOrder;
 
-               localStorage.setItem('appConfig', JSON.stringify({ 
-                   headers: this.headers, 
-                   trainees: this.trainees, 
-                   projects: this.projects,
-                   mapping: this.mapping,
-                   sectionOrder: this.sectionOrder
-               }));
-           } catch(e) {}
+                   localStorage.setItem('appConfig', JSON.stringify({ 
+                       headers: this.headers, 
+                       trainees: this.trainees, 
+                       projects: this.projects,
+                       mapping: this.mapping,
+                       sectionOrder: this.sectionOrder
+                   }));
+               }
+           } catch(e) {
+               console.warn('Config fetch warning:', e);
+           }
        },
 
-       async refreshTrainees() { if(navigator.onLine) await this.fetchConfig(); },
-       get filteredTrainees() { if(!this.searchQuery) return[]; const q=this.searchQuery.toLowerCase(); return this.trainees.filter(t=>t&&String(t).toLowerCase().includes(q)); },
-       getNameIndex() { return this.headers ? this.headers.findIndex(h => String(h).toLowerCase().includes('trainee') && String(h).toLowerCase().includes('name')) : -1; },
-       loadNewForm() { this.loadTraineeForm(''); },
+       async refreshTrainees() { 
+           if(navigator.onLine) await this.syncData(false); 
+       },
+
+       get filteredTrainees() { 
+           if(!this.searchQuery) return []; 
+           const q = this.searchQuery.toLowerCase(); 
+           return this.trainees.filter(t => t && String(t).toLowerCase().includes(q)); 
+       },
+
+       getNameIndex() { 
+           return this.headers ? this.headers.findIndex(h => String(h).toLowerCase().includes('trainee') && String(h).toLowerCase().includes('name')) : -1; 
+       },
+
+       loadNewForm() { 
+           this.loadTraineeForm(''); 
+       },
+
+       // Auto-save form draft to sessionStorage per trainee
+       saveCurrentDraft() {
+           const key = 'draft_' + (this.currentTraineeName || '__new__');
+           sessionStorage.setItem(key, JSON.stringify(this.formData));
+           this.hasDraft = true;
+       },
+
+       discardDraft() {
+           const key = 'draft_' + (this.currentTraineeName || '__new__');
+           sessionStorage.removeItem(key);
+           this.hasDraft = false;
+           this.loadTraineeForm(this.currentTraineeName);
+           this.showToast('Draft discarded, restored from sheet', 'success');
+       },
+
+       confirmLeaveForm() {
+           this.view = 'dashboard';
+       },
 
        async loadTraineeForm(name) {
-           this.setLoading(true);
+           this.setLoading(true, 'Loading trainee history...');
+           this.currentTraineeName = name;
+           this.hasDraft = false;
+
            if (!this.headers || this.headers.length === 0) {
                this.loadConfigFromStorage();
                if (!this.headers || this.headers.length === 0) await this.fetchConfig();
            }
+
            try {
                const history = await this.performAction('getHistory', { trainee: name });
                this.formData = {};
@@ -277,7 +401,7 @@ function appData() {
                        const lower = rawHeader.toLowerCase();
                        
                        if(!lower.includes('date of visit')) {
-                            if (history[rawHeader] !== undefined) {
+                            if (history && history[rawHeader] !== undefined) {
                                 let val = history[rawHeader];
                                 
                                 // Normalize retrieved Dates (fixes Google Sheets UTC/ISO offset bug & "Invalid Date" output)
@@ -304,6 +428,17 @@ function appData() {
                const nameIdx = this.getNameIndex();
                if(nameIdx !== -1) this.formData[nameIdx] = name;
                
+               // Restore existing local draft if available (protects volunteers from losing work)
+               const draftKey = 'draft_' + (name || '__new__');
+               const savedDraft = sessionStorage.getItem(draftKey);
+               if (savedDraft) {
+                   try {
+                       const parsed = JSON.parse(savedDraft);
+                       this.formData = Object.assign({}, this.formData, parsed);
+                       this.hasDraft = true;
+                   } catch(e) {}
+               }
+
                this.expandedSections = {};
                if(this.sectionOrder && this.sectionOrder.length > 0) {
                    this.sectionOrder.forEach(sec => {
@@ -315,13 +450,15 @@ function appData() {
                this.view = 'form';
            } catch(e) {
                this.loadNewForm();
-           } finally { this.setLoading(false); }
+           } finally { 
+               this.setLoading(false); 
+           }
        },
 
        async submitForm() {
            if (this.isSubmitting) return;
            this.isSubmitting = true;
-           this.setLoading(true, 'Submitting...');
+           this.setLoading(true, 'Saving visit to Google Sheet...');
            
            try {
                const rowData = this.headers.map((header, index) => {
@@ -343,20 +480,25 @@ function appData() {
                        traineeName: submittedName 
                    });
                    
-                   if (result.success) {
-                       this.showToast('Submitted successfully!', 'success');
+                   if (result && result.success) {
+                       // Clean up saved draft on successful submission
+                       const draftKey = 'draft_' + (submittedName || '__new__');
+                       sessionStorage.removeItem(draftKey);
+                       this.hasDraft = false;
+
+                       this.showToast('Visit saved successfully to Google Sheet!', 'success');
                        this.view = 'dashboard';
                        this.formData = {};
                        this.searchQuery = '';
-                       this.fetchConfig(); 
+                       await this.fetchConfig(); 
                    } else {
-                       throw new Error(result.error || 'Submission failed');
+                       throw new Error((result && result.error) || 'Submission failed');
                    }
                } else {
                     this.showToast('You are offline. Please connect to internet to submit.', 'error');
                }
            } catch (e) {
-               this.showToast('Error: ' + e.message, 'error');
+               this.showToast('Error: ' + (e.message || 'Submission could not be completed'), 'error');
            } finally {
                this.isSubmitting = false;
                this.setLoading(false);
@@ -495,7 +637,8 @@ function appData() {
        
        resetAppData() { 
            localStorage.clear(); 
-           window.location.reload(true); 
+           sessionStorage.clear();
+           window.location.reload(); 
        },
        
        openSettings() { 
@@ -506,7 +649,7 @@ function appData() {
            this.settingsError = 'Verifying...';
            try {
                const data = await this.performAction('validateSettings', { password: this.settingsPass });
-               if (data.success) {
+               if (data && data.success) {
                    this.settingsUnlocked = true; 
                    this.settingsError = '';
                } else {
@@ -519,10 +662,12 @@ function appData() {
        
        addColumn() { 
            this.performAction('addColumn', { headerName: this.newColumnName }); 
+           this.showToast('Column requested', 'success');
        },
        
        renameColumn(idx, name) { 
            this.performAction('renameColumn', { colIndex: idx, newName: name }); 
+           this.showToast('Rename requested', 'success');
        },
        
        async changePassword(type) { 
@@ -534,7 +679,7 @@ function appData() {
            this.settingsError = 'Updating password...';
            try {
                const data = await this.performAction('changePassword', { type, newPassword: newPass });
-               if (data.success) {
+               if (data && data.success) {
                    this.settingsError = type + ' password updated successfully!';
                    if (type === 'APP') this.newAppPass = '';
                    if (type === 'SETTINGS') this.newSettingsPass = '';
@@ -554,13 +699,13 @@ function appData() {
            this.loadingText = 'Generating mock data...';
            try {
                const data = await this.performAction('generateMockData');
-               if (data.success) {
+               if (data && data.success) {
                    this.mockDataMsg = 'Mock data sheet created successfully!';
                    this.mockDataUrl = data.url || '';
                    this.mockDataError = false;
                    this.showToast('Mock Data Generated', 'success');
                } else {
-                   this.mockDataMsg = data.error || 'Failed to generate mock data.';
+                   this.mockDataMsg = (data && data.error) || 'Failed to generate mock data.';
                    this.mockDataError = true;
                    this.showToast('Generation Failed', 'error');
                }
@@ -577,7 +722,7 @@ function appData() {
            this.toast.message = m;
            this.toast.type = t;
            this.toast.visible = true;
-           setTimeout(() => { this.toast.visible = false; }, 3000); 
+           setTimeout(() => { this.toast.visible = false; }, 3200); 
        }
    };
 }
