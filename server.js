@@ -82,6 +82,12 @@ async function fetchGasWithRetry(apiUrl, payload, maxRetries = 3) {
         body: JSON.stringify(payload)
       });
 
+      if (response.status === 403) {
+        const err = new Error(`Google Apps Script HTTP status: 403 Forbidden (Check Web App deployment settings: Execute as "Me", Who has access "Anyone", or verify if a library requires permissions)`);
+        err.status = 403;
+        throw err;
+      }
+
       if (!response.ok) {
         throw new Error(`Google Apps Script HTTP status: ${response.status} ${response.statusText}`);
       }
@@ -95,6 +101,12 @@ async function fetchGasWithRetry(apiUrl, payload, maxRetries = 3) {
     } catch (err) {
       lastError = err;
       console.warn(`[Proxy attempt ${attempt}/${maxRetries} failed for action "${payload.action}"]: ${err.message}`);
+
+      if (err.status === 403) {
+        // Do not retry 403 because it's a Google permission/deployment issue
+        break;
+      }
+
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 400 + Math.floor(Math.random() * 250);
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -102,7 +114,7 @@ async function fetchGasWithRetry(apiUrl, payload, maxRetries = 3) {
     }
   }
 
-  throw new Error('Backend request failed after retries: ' + (lastError?.message || 'Lock or network timeout'));
+  throw new Error('Backend request failed: ' + (lastError?.message || 'Lock or network timeout'));
 }
 
 // Multi-user API proxy to Google Apps Script
@@ -151,11 +163,6 @@ app.post('/api/action', async (req, res) => {
       const data = await configCache.inFlightPromise;
       return res.json(data);
     } catch (err) {
-      // If we have stale cache, serve it as graceful fallback on network hitch
-      if (configCache.data) {
-        console.warn('GAS fetch failed; returning stale cached config as fallback');
-        return res.json(configCache.data);
-      }
       return res.status(502).json({ error: err.message });
     }
   }

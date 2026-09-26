@@ -2,7 +2,7 @@
 // GLOBAL ENVIRONMENT CONFIGURATION
 // Change APP_ENVIRONMENT to "Exp" for Experimentation or "Prod" for Production
 // =====================================================================
-const APP_ENVIRONMENT = "Exp"; 
+const APP_ENVIRONMENT = "Prod"; 
 
 // ---------------------------------------------------------------------
 // Frontend API URLs (Google Apps Script Web App URLs)
